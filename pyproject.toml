@@ -5,7 +5,7 @@ description = ""
 authors = [{ name = "Brendon", email = "brendonwallace2001@gmail.com" }]
 readme = "README.md"
 requires-python = ">=3.14, <4.0"
-dependencies = ["fastapi[standard] (>=0.128.6,<0.129.0)"]
+dependencies = ["fastapi[standard] (>=0.128.6,<0.129.0)", "sqlalchemy (>=2.0.46,<3.0.0)", "pydantic-settings (>=2.12.0,<3.0.0)", "alembic (>=1.18.4,<2.0.0)"]
 
 
 [build-system]
@@ -22,6 +22,7 @@ dev = [
 
 [tool.ruff]
 line-length = 79
+extend-exclude = ["migrations/*"]
 
 [tool.ruff.lint]
 preview = true
@@ -37,9 +38,9 @@ addopts = '-p no:warnings'
 
 [tool.taskipy.tasks]
 lint = 'ruff check'
-pre_format = 'ruff check --fix'
+pre_format = 'cls && ruff check --fix'
 format = 'ruff format'
 run = 'fastapi dev api_acess_alterdata/app.py'
-pre_test = 'task lint'
+pre_test = 'cls && task lint'
 test = 'pytest -s -x --cov=api_acess_alterdata -vv'
 post_test = 'coverage html'

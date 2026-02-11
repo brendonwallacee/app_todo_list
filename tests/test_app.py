@@ -28,7 +28,7 @@ def test_return_ola_mundo_html(client):
 
 def test_create_user(client):
     user_data = {
-        'name': 'alice',
+        'username': 'alice',
         'email': 'alice@example.com',
         'password': 'secret',
     }
@@ -37,7 +37,7 @@ def test_create_user(client):
 
     assert response.status_code == HTTPStatus.CREATED
     assert response.json() == {
-        'name': 'alice',
+        'username': 'alice',
         'email': 'alice@example.com',
         'id': 1,
     }
@@ -50,7 +50,7 @@ def test_list_users(client):
     assert response.json() == {
         'users': [
             {
-                'name': 'alice',
+                'username': 'alice',
                 'email': 'alice@example.com',
                 'id': 1,
             }
@@ -60,7 +60,7 @@ def test_list_users(client):
 
 def test_update_user(client):
     updated_user_data = {
-        'name': 'bob',
+        'username': 'bob',
         'email': 'bob@example.com',
         'password': 'secret',
     }
@@ -68,7 +68,7 @@ def test_update_user(client):
     response = client.put('/users/1', json=updated_user_data)
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {
-        'name': 'bob',
+        'username': 'bob',
         'email': 'bob@example.com',
         'id': 1,
     }
@@ -77,7 +77,7 @@ def test_update_user(client):
 @pytest.mark.parametrize('user_id', [2, 0, -1])
 def test_update_user_not_found(client, user_id):
     updated_user_data = {
-        'name': 'bob',
+        'username': 'bob',
         'email': 'bob@example.com',
         'password': 'secret',
     }
@@ -95,7 +95,7 @@ def test_read_user(client):
 
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {
-        'name': 'bob',
+        'username': 'bob',
         'email': 'bob@example.com',
         'id': 1,
     }
