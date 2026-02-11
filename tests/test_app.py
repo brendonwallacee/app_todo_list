@@ -1,22 +1,16 @@
 from http import HTTPStatus
 
-from fastapi.testclient import TestClient
-
-from api_acess_alterdata.app import app
+import pytest
 
 
-def test_root_deve_retornar_ola_mundo():
-    client = TestClient(app)
-
+def test_root_return_ola_mundo(client):
     response = client.get('/')
 
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {'message': 'Olá mundo!'}
 
 
-def test_deve_retornar_ola_mundo_em_html():
-    client = TestClient(app)
-
+def test_return_ola_mundo_html(client):
     response = client.get('/html')
 
     assert response.status_code == HTTPStatus.OK
@@ -27,5 +21,110 @@ def test_deve_retornar_ola_mundo_em_html():
       <body>
         <h1>Olá mundo!</h1>
       </body>
-    </html>"""
+    </html>
+    """
     )
+
+
+def test_create_user(client):
+    user_data = {
+        'name': 'alice',
+        'email': 'alice@example.com',
+        'password': 'secret',
+    }
+
+    response = client.post('/users/', json=user_data)
+
+    assert response.status_code == HTTPStatus.CREATED
+    assert response.json() == {
+        'name': 'alice',
+        'email': 'alice@example.com',
+        'id': 1,
+    }
+
+
+def test_list_users(client):
+    response = client.get('/users/')
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {
+        'users': [
+            {
+                'name': 'alice',
+                'email': 'alice@example.com',
+                'id': 1,
+            }
+        ]
+    }
+
+
+def test_update_user(client):
+    updated_user_data = {
+        'name': 'bob',
+        'email': 'bob@example.com',
+        'password': 'secret',
+    }
+
+    response = client.put('/users/1', json=updated_user_data)
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {
+        'name': 'bob',
+        'email': 'bob@example.com',
+        'id': 1,
+    }
+
+
+@pytest.mark.parametrize('user_id', [2, 0, -1])
+def test_update_user_not_found(client, user_id):
+    updated_user_data = {
+        'name': 'bob',
+        'email': 'bob@example.com',
+        'password': 'secret',
+    }
+
+    response = client.put(f'/users/{user_id}', json=updated_user_data)
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.json() == {
+        'detail': 'Usuário não encontrado',
+    }
+
+
+def test_read_user(client):
+    response = client.get('/users/1')
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {
+        'name': 'bob',
+        'email': 'bob@example.com',
+        'id': 1,
+    }
+
+
+@pytest.mark.parametrize('user_id', [2, 0, -1])
+def test_read_user_not_found(client, user_id):
+    response = client.get(f'/users/{user_id}')
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.json() == {
+        'detail': 'Usuário não encontrado',
+    }
+
+
+def test_delete_user(client):
+    response = client.delete('/users/1')
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {
+        'message': 'Usuário deletado com sucesso',
+    }
+
+
+@pytest.mark.parametrize('user_id', [2, 0, -1])
+def test_delete_user_not_found(client, user_id):
+    response = client.delete(f'/users/{user_id}')
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.json() == {
+        'detail': 'Usuário não encontrado',
+    }
