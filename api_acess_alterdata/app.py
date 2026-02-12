@@ -1,11 +1,14 @@
 from http import HTTPStatus
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 
+from api_acess_alterdata.database import get_session
+from api_acess_alterdata.models import User
 from api_acess_alterdata.schemas import (
     Message,
-    UserDB,
     UserList,
     UserPublic,
     UserSchema,
@@ -37,32 +40,67 @@ def read_root_html():
 
 
 @app.post('/users/', status_code=HTTPStatus.CREATED, response_model=UserPublic)
-def create_user(user: UserSchema):
-    user_with_id = UserDB(
-        **user.model_dump(),
-        id=len(database) + 1,
+def create_user(user: UserSchema, session=Depends(get_session)):
+    db_user = session.scalar(
+        select(User).where(
+            (User.username == user.username) | (User.email == user.email)
+        )
     )
-    database.append(user_with_id)
-    return user_with_id
+    if db_user:
+        if db_user.username == user.username:
+            raise HTTPException(
+                status_code=HTTPStatus.CONFLICT,
+                detail='Username já existe',
+            )
+        elif db_user.email == user.email:
+            raise HTTPException(
+                status_code=HTTPStatus.CONFLICT,
+                detail='Email já existe',
+            )
+
+    db_user = User(
+        username=user.username,
+        email=user.email,
+        password=user.password,
+    )
+    session.add(db_user)
+    session.commit()
+    session.refresh(db_user)
+
+    return db_user
 
 
 @app.get('/users/', status_code=HTTPStatus.OK, response_model=UserList)
-def read_users():
-    return {'users': database}
+def read_users(limit: int = 10, offset: int = 0, session=Depends(get_session)):
+    users = session.scalars(select(User).limit(limit).offset(offset))
+    return {'users': users}
 
 
 @app.put(
     '/users/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublic
 )
-def update_user(user_id: int, user: UserSchema):
-    user_with_id = UserDB(**user.model_dump(), id=user_id)
-    if user_id < 1 or user_id > len(database):
+def update_user(user_id: int, user: UserSchema, session=Depends(get_session)):
+    db_user = session.scalar(select(User).where(User.id == user_id))
+
+    if not db_user:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
             detail='Usuário não encontrado',
         )
-    database[user_id - 1] = user_with_id
-    return user_with_id
+    try:
+        db_user.username = user.username
+        db_user.email = user.email
+        db_user.password = user.password
+
+        session.add(db_user)
+        session.commit()
+        session.refresh(db_user)
+        return db_user
+    except IntegrityError:
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT,
+            detail='Username ou email ja cadastrado',
+        )
 
 
 @app.delete(
@@ -70,24 +108,28 @@ def update_user(user_id: int, user: UserSchema):
     status_code=HTTPStatus.OK,
     response_model=Message,
 )
-def delete_user(user_id: int):
-    try:
-        del database[user_id - 1]
-        return {'message': 'Usuário deletado com sucesso'}
-    except IndexError:
+def delete_user(user_id: int, session=Depends(get_session)):
+    db_user = session.scalar(select(User).where(User.id == user_id))
+
+    if not db_user:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
             detail='Usuário não encontrado',
         )
+    session.delete(db_user)
+    session.commit()
+    return Message(message='Usuário deletado com sucesso')
 
 
 @app.get(
     '/users/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublic
 )
-def read_user(user_id: int):
-    if user_id < 1 or user_id > len(database):
+def read_user(user_id: int, session=Depends(get_session)):
+    db_user = session.scalar(select(User).where(User.id == user_id))
+
+    if not db_user:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
             detail='Usuário não encontrado',
         )
-    return database[user_id - 1]
+    return db_user
