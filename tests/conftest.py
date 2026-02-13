@@ -10,6 +10,7 @@ from api_acess_alterdata.app import app
 from api_acess_alterdata.database import get_session
 from api_acess_alterdata.models import User, table_registry
 from api_acess_alterdata.security import get_password_hash
+from api_acess_alterdata.settings import Settings
 
 
 @pytest.fixture
@@ -73,7 +74,7 @@ def user(session):
     session.commit()
     session.refresh(user)
 
-    user.clean_password = password
+    user.clean_password = password  # type: ignore
 
     return user
 
@@ -81,7 +82,12 @@ def user(session):
 @pytest.fixture
 def token(client, user):
     response = client.post(
-        '/token',
+        '/auth/token',
         data={'username': user.email, 'password': user.clean_password},
     )
     return response.json()['access_token']
+
+
+@pytest.fixture
+def settings():
+    return Settings()

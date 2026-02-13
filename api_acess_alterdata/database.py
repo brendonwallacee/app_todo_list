@@ -3,7 +3,9 @@ from sqlalchemy.orm import Session
 
 from api_acess_alterdata.settings import Settings
 
-engine = create_engine(Settings().DATABASE_URL)
+setting = Settings()
+
+engine = create_engine(setting.DATABASE_URL)
 
 
 def get_session():
