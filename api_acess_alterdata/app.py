@@ -7,9 +7,9 @@ from api_acess_alterdata.routers import auth, users
 from api_acess_alterdata.schemas import Message
 
 app = FastAPI(
-  title='To-Do List - API',
-  version='DEV',
-  )
+    title='To-Do List - API',
+    version='DEV',
+)
 
 app.include_router(auth.router)
 app.include_router(users.router)
@@ -20,12 +20,12 @@ app.include_router(users.router)
     status_code=HTTPStatus.OK,
     response_model=Message,
 )
-def read_root():
+async def read_root():
     return {'message': 'Olá mundo!'}
 
 
 @app.get('/html', status_code=HTTPStatus.OK, response_class=HTMLResponse)
-def read_root_html():
+async def read_root_html():
     return """
     <html>
       <body>

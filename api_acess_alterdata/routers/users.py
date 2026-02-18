@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from api_acess_alterdata.database import get_session
 from api_acess_alterdata.models import User
@@ -18,13 +18,13 @@ from api_acess_alterdata.schemas import (
 from api_acess_alterdata.security import get_current_user, get_password_hash
 
 router = APIRouter(prefix='/users', tags=['users'])
-Session = Annotated[Session, Depends(get_session)]
+Session = Annotated[AsyncSession, Depends(get_session)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
 @router.post('/', status_code=HTTPStatus.CREATED, response_model=UserPublic)
-def create_user(user: UserSchema, session: Session):
-    db_user = session.scalar(
+async def create_user(user: UserSchema, session: Session):
+    db_user = await session.scalar(
         select(User).where(
             (User.username == user.username) | (User.email == user.email)
         )
@@ -47,21 +47,23 @@ def create_user(user: UserSchema, session: Session):
         password=get_password_hash(user.password),
     )
     session.add(db_user)
-    session.commit()
-    session.refresh(db_user)
+    await session.commit()
+    await session.refresh(db_user)
 
     return db_user
 
 
 @router.get('/', status_code=HTTPStatus.OK, response_model=UserList)
-def read_users(
+async def read_users(
     session: Session,
     current_user: CurrentUser,
     filter_user: Annotated[FilterPage, Query()],
 ):
-    users = session.scalars(
+    query = await session.scalars(
         select(User).limit(filter_user.limit).offset(filter_user.offset)
-    ).all()
+    )
+    users = query.all()
+
     return {'users': users}
 
 
@@ -70,7 +72,7 @@ def read_users(
     status_code=HTTPStatus.OK,
     response_model=UserPublic,
 )
-def update_user(
+async def update_user(
     user_id: int,
     user: UserSchema,
     session: Session,
@@ -87,8 +89,8 @@ def update_user(
         current_user.password = get_password_hash(user.password)
 
         session.add(current_user)
-        session.commit()
-        session.refresh(current_user)
+        await session.commit()
+        await session.refresh(current_user)
         return current_user
 
     except IntegrityError:
@@ -103,7 +105,7 @@ def update_user(
     status_code=HTTPStatus.OK,
     response_model=Message,
 )
-def delete_user(
+async def delete_user(
     user_id: int,
     session: Session,
     current_user: CurrentUser,
@@ -113,18 +115,18 @@ def delete_user(
             status_code=HTTPStatus.FORBIDDEN,
             detail='Não autorizado a deletar este usuário',
         )
-    session.delete(current_user)
-    session.commit()
+    await session.delete(current_user)
+    await session.commit()
     return Message(message='Usuário deletado com sucesso')
 
 
 @router.get('/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublic)
-def read_user(
+async def read_user(
     user_id: int,
     session: Session,
     current_user: CurrentUser,
 ):
-    db_user = session.scalar(select(User).where(User.id == user_id))
+    db_user = await session.scalar(select(User).where(User.id == user_id))
 
     if not db_user:
         raise HTTPException(

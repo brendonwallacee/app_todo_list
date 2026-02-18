@@ -125,17 +125,21 @@ def test_update_integrity_error(client, user, token):
     assert response.json() == {'detail': 'Username ou email ja cadastrado'}
 
 
-def test_read_user(client, user):
+def test_read_user(client, user, token):
     user_schema = UserPublic.model_validate(user).model_dump()
-    response = client.get('/users/1')
+    response = client.get(
+        '/users/1', headers={'Authorization': f'Bearer {token}'}
+    )
 
     assert response.status_code == HTTPStatus.OK
     assert response.json() == user_schema
 
 
 @pytest.mark.parametrize('user_id', [2, 0, -1])
-def test_read_user_not_found(client, user_id):
-    response = client.get(f'/users/{user_id}')
+def test_read_user_not_found(client, user_id, token):
+    response = client.get(
+        f'/users/{user_id}', headers={'Authorization': f'Bearer {token}'}
+    )
 
     assert response.status_code == HTTPStatus.NOT_FOUND
     assert response.json() == {
