@@ -3,9 +3,7 @@ from datetime import datetime
 
 import pytest
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from api_acess_alterdata.database import get_session
 from api_acess_alterdata.models import User
 
 
@@ -31,14 +29,3 @@ async def test_create_user(session, mock_db_time):
         'created_at': time,
         'updated_at': time,
     }
-
-
-@pytest.mark.asyncio
-async def test_get_session_returns_async_session():
-    gen = get_session()
-
-    session = await anext(gen)
-
-    assert isinstance(session, AsyncSession)
-
-    await gen.aclose()

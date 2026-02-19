@@ -80,7 +80,7 @@ def test_update_user(client, user, token):
     }
 
 
-def test_update_user_unauthorized(client, token):
+def test_update_user_unauthorized(client, other_user, token):
     updated_user_data = {
         'username': 'bob',
         'email': 'bob@example.com',
@@ -88,7 +88,7 @@ def test_update_user_unauthorized(client, token):
     }
 
     response = client.put(
-        '/users/2',
+        f'/users/{other_user.id}',
         json=updated_user_data,
         headers={'Authorization': f'Bearer {token}'},
     )
@@ -99,19 +99,10 @@ def test_update_user_unauthorized(client, token):
     }
 
 
-def test_update_integrity_error(client, user, token):
-    # Cria um segundo usuário para causar um conflito de email
-    second_user_data = {
-        'username': 'charlie',
-        'email': 'charlie@example.com',
-        'password': 'secret',
-    }
-
-    client.post('/users/', json=second_user_data)
-
+def test_update_integrity_error(client, user, other_user, token):
     updated_user_data = {
         'username': 'bob',
-        'email': 'charlie@example.com',
+        'email': other_user.email,
         'password': 'secret',
     }
 
@@ -158,10 +149,10 @@ def test_delete_user(client, user, token):
     }
 
 
-def test_delete_user_unauthorized(client, token):
+def test_delete_user_unauthorized(client, other_user, token):
 
     response = client.delete(
-        '/users/2', headers={'Authorization': f'Bearer {token}'}
+        f'/users/{other_user.id}', headers={'Authorization': f'Bearer {token}'}
     )
 
     assert response.status_code == HTTPStatus.FORBIDDEN
