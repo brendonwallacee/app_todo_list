@@ -3,7 +3,7 @@ from http import HTTPStatus
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 
-from api_acess_alterdata.routers import auth, users
+from api_acess_alterdata.routers import auth, todos, users
 from api_acess_alterdata.schemas import Message
 
 app = FastAPI(
@@ -13,6 +13,7 @@ app = FastAPI(
 
 app.include_router(auth.router)
 app.include_router(users.router)
+app.include_router(todos.router)
 
 
 @app.get(
