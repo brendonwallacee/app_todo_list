@@ -5,14 +5,15 @@ import factory
 import pytest
 import pytest_asyncio
 from fastapi.testclient import TestClient
-from sqlalchemy import StaticPool, event
+from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from testcontainers.postgres import PostgresContainer
 
-from api_acess_alterdata.app import app
-from api_acess_alterdata.database import get_session
-from api_acess_alterdata.models import User, table_registry
-from api_acess_alterdata.security import get_password_hash
-from api_acess_alterdata.settings import Settings
+from app_todo_list.app import app
+from app_todo_list.database import get_session
+from app_todo_list.models import User, table_registry
+from app_todo_list.security import get_password_hash
+from app_todo_list.settings import Settings
 
 
 @pytest.fixture
@@ -27,14 +28,14 @@ def client(session):
     app.dependency_overrides.clear()
 
 
-@pytest_asyncio.fixture
-async def session():
-    engine = create_async_engine(
-        'sqlite+aiosqlite:///:memory:',
-        connect_args={'check_same_thread': False},
-        poolclass=StaticPool,
-    )
+@pytest.fixture(scope='session')
+def engine():
+    with PostgresContainer('postgres:17', driver='psycopg') as postgres:
+        yield create_async_engine(postgres.get_connection_url())
 
+
+@pytest_asyncio.fixture
+async def session(engine):
     async with engine.begin() as conn:
         await conn.run_sync(table_registry.metadata.create_all)
 

@@ -1,5 +1,5 @@
 [project]
-name = "api-acess-alterdata"
+name = "app_todo_list"
 version = "0.1.0"
 description = ""
 authors = [{ name = "Brendon", email = "brendonwallace2001@gmail.com" }]
@@ -13,7 +13,7 @@ dependencies = [
     "pwdlib[argon2] (>=0.3.0,<0.4.0)",
     "pyjwt (>=2.11.0,<3.0.0)",
     "tzdata (>=2025.3,<2026.0)",
-    "aiosqlite (>=0.22.1,<0.23.0)",
+    "psycopg[binary] (>=3.3.3,<4.0.0)",
 ]
 
 
@@ -30,7 +30,9 @@ dev = [
     "pytest-asyncio (>=1.3.0,<2.0.0)",
     "factory-boy (>=3.3.3,<4.0.0)",
     "freezegun (>=1.5.5,<2.0.0)",
+    "testcontainers (>=4.14.1,<5.0.0)",
 ]
+
 
 [tool.ruff]
 line-length = 79
@@ -53,7 +55,7 @@ asyncio_default_fixture_loop_scope = 'function'
 lint = 'cls &&ruff check'
 pre_format = 'cls && ruff check --fix'
 format = 'ruff format'
-run = 'fastapi dev api_acess_alterdata/app.py'
+run = 'fastapi dev app_todo_list/app.py'
 pre_test = 'cls && task lint'
-test = 'pytest -s -x --cov=api_acess_alterdata -vv'
+test = 'pytest -s -x --cov=app_todo_list -vv'
 post_test = 'coverage html'

@@ -2,7 +2,7 @@ from http import HTTPStatus
 
 import pytest
 
-from api_acess_alterdata.schemas import UserPublic
+from app_todo_list.schemas import UserPublic
 
 
 def test_create_user(client):

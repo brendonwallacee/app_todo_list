@@ -6,10 +6,10 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api_acess_alterdata.database import get_session
-from api_acess_alterdata.models import User
-from api_acess_alterdata.schemas import Token
-from api_acess_alterdata.security import (
+from app_todo_list.database import get_session
+from app_todo_list.models import User
+from app_todo_list.schemas import Token
+from app_todo_list.security import (
     create_access_token,
     get_current_user,
     verify_password,

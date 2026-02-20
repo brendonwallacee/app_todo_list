@@ -1,0 +1,25 @@
+services:
+
+  todo_list_database:
+    image: postgres:17
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: app_password
+      POSTGRES_DB: app_db
+    ports:
+      - "5433:5432"
+
+  todo_list_api:
+    image: app_todo_list
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - todo_list_database
+    environment:
+      DATABASE_URL: postgresql+psycopg://app_user:app_password@todo_list_database:5432/app_db
+
+volumes:
+  pgdata:

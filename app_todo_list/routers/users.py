@@ -6,16 +6,16 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api_acess_alterdata.database import get_session
-from api_acess_alterdata.models import User
-from api_acess_alterdata.schemas import (
+from app_todo_list.database import get_session
+from app_todo_list.models import User
+from app_todo_list.schemas import (
     FilterPage,
     Message,
     UserList,
     UserPublic,
     UserSchema,
 )
-from api_acess_alterdata.security import get_current_user, get_password_hash
+from app_todo_list.security import get_current_user, get_password_hash
 
 router = APIRouter(prefix='/users', tags=['users'])
 Session = Annotated[AsyncSession, Depends(get_session)]

@@ -1,10 +1,15 @@
+import asyncio
+import sys
 from http import HTTPStatus
 
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 
-from api_acess_alterdata.routers import auth, todos, users
-from api_acess_alterdata.schemas import Message
+from app_todo_list.routers import auth, todos, users
+from app_todo_list.schemas import Message
+
+if sys.platform == 'win32':
+    asyncio.set_event_loop_policy(asyncio._WindowsSelectorEventLoopPolicy())
 
 app = FastAPI(
     title='To-Do List - API',

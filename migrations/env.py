@@ -1,4 +1,5 @@
 import asyncio
+import sys
 from logging.config import fileConfig
 
 from sqlalchemy.ext.asyncio import async_engine_from_config
@@ -6,8 +7,8 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from api_acess_alterdata.settings import Settings
-from api_acess_alterdata.models import table_registry
+from app_todo_list.settings import Settings
+from app_todo_list.models import table_registry
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -74,6 +75,9 @@ async def run_async_migrations() -> None:
 
 def run_migrations_online() -> None:
    asyncio.run(run_async_migrations())
+
+if sys.platform == 'win32':
+    asyncio.set_event_loop_policy(asyncio._WindowsSelectorEventLoopPolicy())
 
 if context.is_offline_mode():
     run_migrations_offline()

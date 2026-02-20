@@ -3,9 +3,9 @@ from http import HTTPStatus
 import factory
 import factory.fuzzy
 import pytest
-from sqlalchemy import select
+from sqlalchemy.exc import StatementError
 
-from api_acess_alterdata.models import Todo, TodoState
+from app_todo_list.models import Todo, TodoState
 
 
 class TodoFactory(factory.Factory):
@@ -44,19 +44,18 @@ def test_create_todo(client, token, mock_db_time):
 
 
 @pytest.mark.asyncio
-async def test_create_todo_error(session, user):
+async def test_create_todo_with_invalid_state(session, user):
     todo = Todo(
         title='Test Todo',
         description='Test Desc',
-        state='test',
+        state='test',  # pyright: ignore - O teste é justamente esse
         user_id=user.id,
     )
 
     session.add(todo)
-    await session.commit()
 
-    with pytest.raises(LookupError):
-        await session.scalar(select(Todo))
+    with pytest.raises((LookupError, StatementError)):
+        await session.commit()
 
 
 @pytest.mark.asyncio

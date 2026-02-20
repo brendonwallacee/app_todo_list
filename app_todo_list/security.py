@@ -9,9 +9,9 @@ from pwdlib import PasswordHash
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api_acess_alterdata.database import get_session
-from api_acess_alterdata.models import User
-from api_acess_alterdata.settings import Settings
+from app_todo_list.database import get_session
+from app_todo_list.models import User
+from app_todo_list.settings import Settings
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/auth/token')
 pwd_context = PasswordHash.recommended()

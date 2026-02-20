@@ -4,7 +4,7 @@ from datetime import datetime
 import pytest
 from sqlalchemy import select
 
-from api_acess_alterdata.models import User
+from app_todo_list.models import User
 
 
 @pytest.mark.asyncio
