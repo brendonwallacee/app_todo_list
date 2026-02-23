@@ -1,0 +1,30 @@
+name: pipeline
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      ALGORITHM: ${{ secrets.ALGORITHM }}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}
+
+    steps:
+      - name: Copia os arquivos do repositório
+        uses: actions/checkout@v5
+
+      - name: Instala o Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+      
+      - name: Instala o Poetry
+        run: pipx install poetry
+      
+      - name: Instala as dependências
+        run: poetry install
+      
+      - name: Executa os testes
+        run: poetry run task test
