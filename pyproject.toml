@@ -52,10 +52,10 @@ addopts = '-p no:warnings'
 asyncio_default_fixture_loop_scope = 'function'
 
 [tool.taskipy.tasks]
-lint = 'cls &&ruff check'
-pre_format = 'cls && ruff check --fix'
+lint = 'ruff check'
+pre_format = 'ruff check --fix'
 format = 'ruff format'
 run = 'fastapi dev app_todo_list/app.py'
-pre_test = 'cls && task lint'
+pre_test = 'task lint'
 test = 'pytest -s -x --cov=app_todo_list -vv'
 post_test = 'coverage html'
