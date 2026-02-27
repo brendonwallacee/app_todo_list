@@ -2,9 +2,11 @@
 
 name: Fly Deploy
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["pipeline"]
+    types:
+      - completed
+
 jobs:
   deploy:
     name: Deploy app
