@@ -64,7 +64,7 @@ async def get_current_user(
         raise credentials_exception
 
     user = await session.scalar(
-        select(User).where(User.email == subject_email)
+        select(User).where(User.username == subject_email)
     )
 
     if not user:
