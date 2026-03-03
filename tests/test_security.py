@@ -44,7 +44,7 @@ def test_get_current_user_not_found(client):
 
 
 def test_get_current_user_does_not_exists(client):
-    data = {'sub': 'test@test'}
+    data = {'sub': str(1)}
     token = create_access_token(data)
 
     response = client.delete(
